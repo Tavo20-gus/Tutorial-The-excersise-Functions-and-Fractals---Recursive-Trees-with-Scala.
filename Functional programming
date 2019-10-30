@@ -1,0 +1,178 @@
+/** Tutorial about the excersise Functions and Fractals - Recursive Trees with Scala.
+* I will explain how we can solve this Hackerrank functional programming exercise which is a very complex and very interesting exercise
+* First I will put the instructions of the problem.
+*The exercise gives us an introduction to an idea of how we can solve the problem, it even shows us two examples.
+/*
+/** Input Format
+* A single integer, N. 
+
+* Constraints
+* N <= 5
+* And, you need to accomplish this without directly defining any local variables. For example,
+* var and val have been blocked in Scala; def and defn are blocked in Clojure. 
+
+* Output Format
+* The Nth iteration of the Fractal Tree, as shown above. It should be a matrix of 63 rows and 100 columns. 
+* (i.e. 6300 printable characters) It should be composed entirely of underscores and ones,
+* in a manner similar to the examples provided. Do not include any extra leading or trailing spaces. 
+/*
+
+/** The exercise already gives us a code base where we will develop the code. /*
+object Solution {
+
+  def main(args: Array[String]) {
+    println(
+      draw(0, 100 / 2, 100, 16, 0, 63, scala.io.StdIn.readInt(), 1, 5).reverseMap(_.mkString).mkString("\n")
+    )
+  }
+
+  def mergeResult(l1: List[List[Char]], l2: List[List[Char]]): List[List[Char]] =
+    l1 zip l2 map { p: (List[Char], List[Char]) => p._1 ::: p._2 }
+    
+  /** First we are going to need to create a function with several parameters. 
+  * we need the x coordinate of the leftmost point that belongs to the drawer,
+  we will call this xStart.
+  
+  *and another with x coordinate of the rightmost point that belongs to the drawer this to mark a margin, 
+  *a beginning and an end to this we will call xEnd
+  
+  *One of the most important points that we will need is that of the x coordinate of the center of the tree 
+  within the bounding box we will call XCenter 
+  
+  *we need the size of the trunk of the tree remember that the size is twice the size of the trunk at this parameter 
+  we will call it currHeight.ç
+  
+  *We need the number of rows when it is filling. we will assign heightGap.
+  * total number of rows is equal yMAx 
+  * we need the number of the levels that is equal visDepth
+  * total number of levels that we will call maxDepth
+  * and finally a parameter that current level so we will call currDepth
+  */
+  /** In scale remember to put in the parameters the type of variable /*
+  def draw(xStart: Int, xCenter: Int, xEnd: Int, currHeight: Int, heightGap: Int, yMax: Int, visDepth: Int, currDepth: Int, maxDepth: Int): List[List[Char]] = {
+
+/** after creating the function we apply the necessary operations where xEnd and xCenter will be subtracted, in the same way with
+xCenter and xStar and divide it by 2*/
+    drawTree(xEnd - xStart, xCenter - xStart, currHeight, 2 * currHeight,
+
+/** We create our conditional if we match the maximum level with current level with the operation of the subtraction between yMax and heightGarp
+if it does not give result 0. */
+      if (currDepth == maxDepth) yMax - heightGap - 2 * currHeight else 0, currDepth > visDepth
+
+    ) ::: (if (currDepth < maxDepth) {
+
+      mergeResult(
+
+        draw(xStart, xCenter - currHeight, xCenter, currHeight / 2, // left half
+
+          heightGap + 2 * currHeight, yMax, visDepth, currDepth + 1, maxDepth),
+
+        draw(xCenter, xCenter + currHeight, xEnd, // right half
+
+          currHeight / 2, heightGap + 2 * currHeight, yMax, visDepth, currDepth + 1, maxDepth)
+
+      )
+
+    } else {
+/** remember that Nil is references an object directly
+      Nil
+
+    })
+
+  }
+  
+  /**
+
+   * width - size of fragment along x coordinate
+
+   * posCenter - x coordinate of center of tree
+
+   * currHeight - current height of tree's trunk
+
+   * yPos - y coordinate iterator of figure (2 * currHeight to 0)
+
+   * yGap - number of placeholder lines to draw after tree
+
+   * isPlaceholder - if true draw placeholder lines instead of tree
+
+   */
+
+  def drawTree(width: Int, posCenter: Int, currHeight: Int, yPos: Int, yGap: Int, isPlaceholder: Boolean): List[List[Char]] = {
+
+    if (isPlaceholder) {
+
+      yPos match {
+
+        case n if n > 0 => ("_" * width).toList :: drawTree(width, posCenter, currHeight, yPos - 1, yGap, isPlaceholder)
+
+        case _ =>
+
+          yGap match {
+
+            case m if m > 0 => ("_" * width).toList :: drawTree(width, posCenter, currHeight, yPos, m - 1, isPlaceholder)
+
+            case _ => Nil
+
+          }
+
+      }
+
+    } else {
+
+      yPos match {
+
+        case n if n > 0 =>
+
+          n match {
+
+            case tr if tr > currHeight =>
+
+              (("_" * (posCenter - 1)) + "1" + ("_" * (width - posCenter))).toList ::
+
+                drawTree(width, posCenter, currHeight, yPos - 1, yGap, isPlaceholder)
+
+            case br =>
+
+              mergeResult(
+
+                branch(posCenter - 2, 1, currHeight, isLeft=true),
+
+                branch(0, width - posCenter - 1, currHeight, isLeft=false)
+
+              ) ::: (if (yPos == 1) drawTree(width, posCenter, currHeight, 0, yGap, isPlaceholder=true) else Nil)
+
+          }
+
+        case _ => Nil
+
+      }
+
+    }
+
+  }
+
+
+
+  def branch(padLeft: Int, padRight: Int, items: Int, isLeft: Boolean): List[List[Char]] = {
+
+    items match {
+
+      case 0 => Nil
+
+      case _ =>
+
+        (("_" * padLeft) + "1" + ("_" * padRight)).toList :: (
+
+          if (isLeft) branch(padLeft - 1, padRight + 1, items - 1, isLeft)
+
+          else branch(padLeft + 1, padRight - 1, items - 1, isLeft)
+
+          )
+
+    }
+
+  }
+
+}
+  
+  
